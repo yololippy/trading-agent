@@ -227,3 +227,48 @@ TODO：
 - [ ] 核查 Agent Gateway 的实际工具权限，确保研究 Agent 无法通过通用接口绕过系统风控。
 - [ ] 用同一套验收场景比较 NautilusTrader、LumiBot 和 QuantDinger；比较对象是完整账户工作流，不只是下单成功。
 - [ ] 在目标 Mac 上分别测量核心栈和附加监控栈的空闲/峰值内存、CPU、磁盘增长与故障恢复时间。
+
+## 12. Mac 与 iOS 高定制客户端选型（2026-10-23）
+
+### 结论
+
+如果优先级是原生体验、长期可控和尽量高的界面定制能力，当前建议：
+
+> **TradingAgents（研究）＋NautilusTrader（执行与对账）＋自建服务端 API＋SwiftUI 多平台客户端。**
+
+客户端与交易引擎解耦。Mac 和 iOS App 不直接嵌入 TradingAgents 或 NautilusTrader，也不直接连接 IBKR；它们通过统一服务端 API 查看状态和提交命令。这样以后替换研究 Agent 或执行引擎，不需要重写两套 App。
+
+### 三个候选对客户端定制的影响
+
+| 候选 | 对高定制 Mac/iOS App 的适合度 | 判断 |
+| --- | --- | --- |
+| TradingAgents＋NautilusTrader | **最高** | 两层职责清楚，适合做无界面的后端能力；客户端契约由我们控制。集成工作较多，但不会被现成 UI 和产品数据模型锁住。 |
+| LumiBot | **中等** | 可减少研究、策略和执行的桥接工作，但没有替我们提供原生 Mac/iOS 产品层。仍须自建同样的 API、认证、实时推送和客户端，前端定制优势不明显。 |
+| QuantDinger | **快速形成产品界面较强；原生深度定制中等** | 已有完整后端、桌面 Web 和 Mobile H5，可复用产品流程；手机端是 Vue 3＋Capacitor 的混合 App。适合快速改主题、页面和表单，但系统级原生体验、Mac 原生桌面交互和长期模型自由度不如自建 SwiftUI。 |
+
+因此，不因为 QuantDinger 已经有 Mobile H5 就把它定为主后端。它最值得借鉴的是页面信息架构、同源 `/api/`、策略运行页、订单/成交/健康状态展示、Agent Scope 和实盘双开关。
+
+QuantDinger Mobile 当前同一套 Vue 代码可发布为 H5、Android 和 Capacitor iOS；没有独立的原生 macOS 客户端。其许可证允许符合条款的个人非商业修改，但要求保留许可和指定品牌署名，商业使用需另行获得授权。这会影响完全白标或以后产品化的自由度。
+
+来源：[QuantDinger Mobile 固定提交](https://github.com/OpenByteInc/QuantDinger-Mobile/tree/08f6c663a3541d20c6c7f7e1df59b65fbb329d83)、[README](https://github.com/OpenByteInc/QuantDinger-Mobile/blob/08f6c663a3541d20c6c7f7e1df59b65fbb329d83/README_CN.md)、[前端许可证](https://github.com/OpenByteInc/QuantDinger-Mobile/blob/08f6c663a3541d20c6c7f7e1df59b65fbb329d83/LICENSE)。
+
+### 建议的 Apple 客户端结构
+
+- 一个共享 Swift Package：账户、合约、订单、成交、研究报告、策略状态等数据模型；REST/WebSocket 客户端；认证、Keychain、重试和状态一致性逻辑。
+- iOS App：账户与风险摘要、AI 建议、人工确认、订单状态、模式切换、告警和受限下单，支持 Face ID/Touch ID 作为敏感操作的本地确认步骤。
+- macOS App：除 iOS 功能外，增加多窗口、研究报告对比、策略配置、回测任务、日志与运行监控；服务端管理功能按权限开放。
+- 后端使用版本化 API；查询和命令分开，交易命令携带幂等键，订单和策略状态通过 WebSocket/SSE 推送。
+- App 显示数据时间、连接状态和完整性；离线或状态未知时，不把旧数据显示成实时，也不允许盲目重复提交。
+- Mac mini 上的服务进程与 macOS 客户端分离。关闭客户端不能停止策略、同步或告警；客户端升级也不应影响交易服务。
+
+### 可替代路径
+
+如果以后把“最快可用”放在“原生深度定制”之前，可以采用 QuantDinger 后端＋修改其 Vue/Capacitor 客户端，或者 LumiBot 后端＋自建 SwiftUI。无论选择哪条路径，客户端都必须经过统一风控 API，不能直接持有 IBKR 凭据或绕过订单状态管理。
+
+TODO：
+
+- [ ] 先定义服务端领域模型和 OpenAPI/事件契约，再开始具体页面开发。
+- [ ] 制定 iOS 与 macOS 信息架构，明确共享页面和仅 Mac 提供的管理能力。
+- [ ] 验证后台推送、弱网、重复点击、App 被系统终止以及重新登录后的状态恢复。
+- [ ] 决定个人自用是否需要 App Store 分发；若只在自己的设备使用，评估签名、更新和远程访问方式。
+- [ ] 在 SwiftUI 原型中验证图表、订单确认、实时列表和长报告的体验与资源消耗。
