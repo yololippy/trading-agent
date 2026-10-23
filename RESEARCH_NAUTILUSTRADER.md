@@ -219,4 +219,3 @@ NautilusTrader IB 适配器测试涉及撤单事件、佣金后成交事件、�
 
 按你的使用方式，本轮仍保留 TradingAgents＋NautilusTrader 为主候选，LumiBot 为完整替代候选。这个排序依据模块边界和已看到的对账实现，不是性能或可靠性实测排名。最终比较应围绕上表，不能只比支持多少券商或有多少 Agent 示例。
 
-
