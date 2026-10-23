@@ -227,4 +227,3 @@ TODO：
 - [ ] 核查 Agent Gateway 的实际工具权限，确保研究 Agent 无法通过通用接口绕过系统风控。
 - [ ] 用同一套验收场景比较 NautilusTrader、LumiBot 和 QuantDinger；比较对象是完整账户工作流，不只是下单成功。
 - [ ] 在目标 Mac 上分别测量核心栈和附加监控栈的空闲/峰值内存、CPU、磁盘增长与故障恢复时间。
-
