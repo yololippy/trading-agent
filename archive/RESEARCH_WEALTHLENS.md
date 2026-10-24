@@ -1,3 +1,5 @@
+> 历史归档（2026-10-24）：保留原始调研与来源，不再维护本文中的旧 TODO。当前需求以 [项目大纲](../PROJECT_OUTLINE.md) 为准，活跃任务见 [TODO](../TODO.md)；下文推荐不代表当前选型。
+
 # WealthLens 调研：多券商资产看板与当前 IBKR 系统的关系
 
 核查日期：2026-10-22。仓库：[ejjcc/wealthlens](https://github.com/ejjcc/wealthlens)。
