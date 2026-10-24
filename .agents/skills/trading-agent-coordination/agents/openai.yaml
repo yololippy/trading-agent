@@ -1,0 +1,3 @@
+interface:
+  display_name: "Trading Agent 协作"
+  short_description: "协调本仓库的开发会话，管理套餐额度恢复后的持续续跑与完成停止"
